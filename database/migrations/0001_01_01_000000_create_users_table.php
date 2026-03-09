@@ -17,6 +17,17 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            
+            // Các cột bổ sung cho đồ án
+            $table->string('role')->default('resident'); // admin, warehouse_manager, driver, resident
+            $table->string('phone')->nullable();
+            $table->string('identity_card', 20)->unique()->nullable();
+            $table->text('address')->nullable();
+            $table->decimal('latitude', 10, 8)->nullable();
+            $table->decimal('longitude', 11, 8)->nullable();
+            $table->string('qr_code')->unique()->nullable();
+            $table->string('telegram_chat_id', 100)->nullable();
+            
             $table->rememberToken();
             $table->timestamps();
         });
