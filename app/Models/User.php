@@ -33,8 +33,34 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'password'         => 'hashed',
         ];
+    }
+
+    // ====== Role Helpers ======
+    public function hasRole(string $role): bool
+    {
+        return $this->role === $role;
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isWarehouseManager(): bool
+    {
+        return $this->role === 'warehouse_manager';
+    }
+
+    public function isDriver(): bool
+    {
+        return $this->role === 'driver';
+    }
+
+    public function isResident(): bool
+    {
+        return $this->role === 'resident';
     }
 
     // Quan hệ
