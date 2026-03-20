@@ -1,228 +1,140 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard – ĐẠI PHÚC</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
-</head>
-<body>
+@extends('layouts.app')
+@section('title', 'Admin Dashboard - ĐẠI PHÚC')
 
-{{-- TOP NAV --}}
-<nav class="dash-topnav">
-    <a href="/" class="dash-brand">
-        <i class="fas fa-shield-heart"></i> ĐẠI PHÚC
-    </a>
-    <div class="dash-nav-right">
-        <span class="dash-welcome">
-            Xin chào, <strong>{{ auth()->user()->name }}</strong>
-        </span>
-        <span class="dash-role-badge badge-admin">
-            <i class="fas fa-crown"></i> Quản trị viên
-        </span>
-        <form method="POST" action="{{ route('logout') }}">
-            @csrf
-            <button type="submit" class="dash-logout-btn">
-                <i class="fas fa-sign-out-alt"></i> Đăng xuất
-            </button>
-        </form>
+@section('content')
+<div class="dash-layout" x-data="{ sidebarOpen: true }">
+
+  {{-- ==================== SIDEBAR ==================== --}}
+  <aside class="sidebar" :class="{ 'open': sidebarOpen }">
+    <div class="sidebar-logo">🌊 ĐẠI <span>PHÚC</span></div>
+
+    <div class="sidebar-section">TỔNG QUAN</div>
+    <nav class="sidebar-nav">
+      <a href="#" class="active"><span class="nav-icon">📊</span> Dashboard</a>
+      <a href="#"><span class="nav-icon">🏠</span> Hộ dân</a>
+      <a href="#"><span class="nav-icon">📦</span> Kho hàng</a>
+    </nav>
+
+    <div class="sidebar-section">VẬN CHUYỂN</div>
+    <nav class="sidebar-nav">
+      <a href="#"><span class="nav-icon">🚛</span> Chuyến xe</a>
+      <a href="#"><span class="nav-icon">🗺️</span> Giám sát GPS</a>
+      <a href="#"><span class="nav-icon">👤</span> Tài xế</a>
+    </nav>
+
+    <div class="sidebar-section">HỆ THỐNG</div>
+    <nav class="sidebar-nav">
+      <a href="#"><span class="nav-icon">👥</span> Người dùng</a>
+      <a href="#"><span class="nav-icon">📋</span> Phê duyệt</a>
+      <a href="#"><span class="nav-icon">💬</span> Phản hồi</a>
+      <a href="#"><span class="nav-icon">⚙️</span> Cài đặt</a>
+    </nav>
+
+    <div style="margin-top:auto;padding:1rem 1.25rem;border-top:1px solid rgba(255,255,255,.1)">
+      <a href="/" style="display:flex;align-items:center;gap:.5rem;font-size:.82rem;color:rgba(255,255,255,.5);padding:.35rem 0">
+        ← Về trang chủ
+      </a>
     </div>
-</nav>
+  </aside>
 
-<div class="dash-layout">
-    {{-- SIDEBAR --}}
-    <aside class="dash-sidebar">
-        <div class="sidebar-section-label">Tổng quan</div>
-        <a href="{{ route('admin.dashboard') }}" class="sidebar-link active">
-            <i class="fas fa-chart-pie"></i> Dashboard
-        </a>
+  {{-- ==================== MAIN ==================== --}}
+  <main class="dash-main">
+    @include('partials.dashboard-header', ['pageTitle' => '📊 Tổng quan hệ thống'])
+    <div style="padding:1.5rem">
 
-        <div class="sidebar-section-label">Quản lý người dùng</div>
-        <a href="#" class="sidebar-link">
-            <i class="fas fa-users"></i> Tài khoản
-        </a>
-        <a href="#" class="sidebar-link">
-            <i class="fas fa-user-shield"></i> Phân quyền
-        </a>
+    {{-- STAT CARDS --}}
+    <div class="dash-stats">
+      <div class="dash-card">
+        <div class="card-icon" style="background:#dcfce7;color:#16a34a">🏠</div>
+        <div class="card-value">12.567</div>
+        <div class="card-label">Hộ dân đã hỗ trợ</div>
+        <div class="card-change up">↑ 12% so với tuần trước</div>
+      </div>
+      <div class="dash-card">
+        <div class="card-icon" style="background:#dbeafe;color:#2563eb">🚛</div>
+        <div class="card-value">1.234</div>
+        <div class="card-label">Tổng chuyến xe</div>
+        <div class="card-change up">↑ 8% so với tuần trước</div>
+      </div>
+      <div class="dash-card">
+        <div class="card-icon" style="background:#fef3c7;color:#d97706">📦</div>
+        <div class="card-value">487</div>
+        <div class="card-label">Tấn hàng phân phối</div>
+        <div class="card-change up">↑ 15% so với tuần trước</div>
+      </div>
+      <div class="dash-card">
+        <div class="card-icon" style="background:#fee2e2;color:#dc2626">⏳</div>
+        <div class="card-value">23</div>
+        <div class="card-label">Chờ phê duyệt</div>
+        <div class="card-change down">Cần xử lý gấp</div>
+      </div>
+    </div>
 
-        <div class="sidebar-section-label">Kho & Vật tư</div>
-        <a href="#" class="sidebar-link">
-            <i class="fas fa-warehouse"></i> Kho hàng
-        </a>
-        <a href="#" class="sidebar-link">
-            <i class="fas fa-boxes-stacked"></i> Vật tư
-        </a>
-        <a href="#" class="sidebar-link">
-            <i class="fas fa-arrow-down-to-bracket"></i> Nhập kho
-        </a>
-        <a href="#" class="sidebar-link">
-            <i class="fas fa-arrow-up-from-bracket"></i> Xuất kho
-        </a>
+    {{-- CHARTS ROW --}}
+    <div style="display:grid;grid-template-columns:2fr 1fr;gap:1.25rem;margin-bottom:1.5rem">
+      <div class="chart-container">
+        <h3>📈 Số chuyến xe theo ngày</h3>
+        <canvas id="tripsChart" height="200"></canvas>
+      </div>
+      <div class="chart-container">
+        <h3>📊 Trạng thái hộ dân</h3>
+        <canvas id="statusChart" height="200"></canvas>
+      </div>
+    </div>
 
-        <div class="sidebar-section-label">Vận chuyển</div>
-        <a href="#" class="sidebar-link">
-            <i class="fas fa-truck"></i> Chuyến xe
-        </a>
-        <a href="#" class="sidebar-link">
-            <i class="fas fa-route"></i> Lộ trình
-        </a>
+    {{-- MAP --}}
+    <div class="chart-container" style="margin-bottom:1.5rem">
+      <h3>🗺️ Giám sát xe trực tiếp</h3>
+      <div id="adminMap" style="height:350px;border-radius:8px;margin-top:.75rem"></div>
+    </div>
 
-        <div class="sidebar-section-label">Cứu trợ</div>
-        <a href="#" class="sidebar-link">
-            <i class="fas fa-house-chimney-user"></i> Hộ dân
-        </a>
-        <a href="#" class="sidebar-link">
-            <i class="fas fa-hand-holding-heart"></i> Phân phát
-        </a>
-        <a href="#" class="sidebar-link">
-            <i class="fas fa-comment-dots"></i> Phản ánh
-        </a>
-
-        <div class="sidebar-section-label">Hệ thống</div>
-        <a href="#" class="sidebar-link">
-            <i class="fas fa-chart-bar"></i> Báo cáo
-        </a>
-        <a href="{{ route('profile.edit') }}" class="sidebar-link">
-            <i class="fas fa-user-cog"></i> Hồ sơ
-        </a>
-    </aside>
-
-    {{-- MAIN --}}
-    <main class="dash-main">
-        <div class="dash-page-header">
-            <h1>🛡️ Bảng điều khiển Admin</h1>
-            <p>Quản lý toàn bộ hệ thống cứu trợ bão lũ ĐẠI PHÚC</p>
-        </div>
-
-        {{-- STATS --}}
-        <div class="dash-stats">
-            <div class="dash-stat-card">
-                <div class="dash-stat-icon icon-blue"><i class="fas fa-users" style="color:#3b82f6"></i></div>
-                <div class="dash-stat-info">
-                    <div class="dash-stat-value">128</div>
-                    <div class="dash-stat-label">Tài khoản hệ thống</div>
-                </div>
-            </div>
-            <div class="dash-stat-card">
-                <div class="dash-stat-icon icon-teal"><i class="fas fa-house-chimney-user" style="color:#0d9488"></i></div>
-                <div class="dash-stat-info">
-                    <div class="dash-stat-value">12.567</div>
-                    <div class="dash-stat-label">Hộ dân đã hỗ trợ</div>
-                </div>
-            </div>
-            <div class="dash-stat-card">
-                <div class="dash-stat-icon icon-orange"><i class="fas fa-truck" style="color:#f97316"></i></div>
-                <div class="dash-stat-info">
-                    <div class="dash-stat-value">1.234</div>
-                    <div class="dash-stat-label">Chuyến xe hoàn thành</div>
-                </div>
-            </div>
-            <div class="dash-stat-card">
-                <div class="dash-stat-icon icon-green"><i class="fas fa-boxes-stacked" style="color:#22c55e"></i></div>
-                <div class="dash-stat-info">
-                    <div class="dash-stat-value">487t</div>
-                    <div class="dash-stat-label">Hàng hóa phân phát</div>
-                </div>
-            </div>
-            <div class="dash-stat-card">
-                <div class="dash-stat-icon icon-red"><i class="fas fa-comment-dots" style="color:#ef4444"></i></div>
-                <div class="dash-stat-info">
-                    <div class="dash-stat-value">23</div>
-                    <div class="dash-stat-label">Phản ánh chờ xử lý</div>
-                </div>
-            </div>
-            <div class="dash-stat-card">
-                <div class="dash-stat-icon icon-purple"><i class="fas fa-warehouse" style="color:#8b5cf6"></i></div>
-                <div class="dash-stat-info">
-                    <div class="dash-stat-value">8</div>
-                    <div class="dash-stat-label">Kho hàng hoạt động</div>
-                </div>
-            </div>
-        </div>
-
-        {{-- ACTIVITY + ACCOUNTS --}}
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
-
-            <div class="dash-card">
-                <div class="dash-card-header">
-                    <div class="dash-card-title"><i class="fas fa-bolt"></i> Hoạt động gần đây</div>
-                </div>
-                <div class="dash-card-body">
-                    <div class="activity-list">
-                        <div class="activity-row">
-                            <div class="activity-dot dot-green"></div>
-                            <div>
-                                <div class="activity-text">Kho Yên Bái nhập 2 tấn gạo</div>
-                                <div class="activity-meta">5 phút trước • Thủ kho Minh</div>
-                            </div>
-                        </div>
-                        <div class="activity-row">
-                            <div class="activity-dot dot-blue"></div>
-                            <div>
-                                <div class="activity-text">Chuyến TX-099 xuất phát</div>
-                                <div class="activity-meta">20 phút trước • Tài xế Hùng</div>
-                            </div>
-                        </div>
-                        <div class="activity-row">
-                            <div class="activity-dot dot-orange"></div>
-                            <div>
-                                <div class="activity-text">85 hộ dân xác nhận nhận hàng</div>
-                                <div class="activity-meta">1 giờ trước • Xã Tân Tiến</div>
-                            </div>
-                        </div>
-                        <div class="activity-row">
-                            <div class="activity-dot dot-red"></div>
-                            <div>
-                                <div class="activity-text">Cảnh báo hết nước uống kho Trấn Yên</div>
-                                <div class="activity-meta">2 giờ trước • Hệ thống</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="dash-card">
-                <div class="dash-card-header">
-                    <div class="dash-card-title"><i class="fas fa-users"></i> Tài khoản mới nhất</div>
-                    <a href="#" class="dash-btn dash-btn-primary" style="font-size:12px;padding:7px 14px">
-                        <i class="fas fa-plus"></i> Thêm
-                    </a>
-                </div>
-                <div class="dash-card-body" style="padding:0">
-                    <table class="dash-table">
-                        <thead>
-                            <tr>
-                                <th>Họ tên</th>
-                                <th>Role</th>
-                                <th>Trạng thái</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Nguyễn Văn A</td>
-                                <td><span class="badge badge-info">Thủ kho</span></td>
-                                <td><span class="badge badge-success">Hoạt động</span></td>
-                            </tr>
-                            <tr>
-                                <td>Trần Thị B</td>
-                                <td><span class="badge badge-warning">Tài xế</span></td>
-                                <td><span class="badge badge-success">Hoạt động</span></td>
-                            </tr>
-                            <tr>
-                                <td>Lê Văn C</td>
-                                <td><span class="badge badge-gray">Dân cư</span></td>
-                                <td><span class="badge badge-success">Hoạt động</span></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-        </div>
-    </main>
+    {{-- TABLE: CHUYẾN XE --}}
+    <div class="table-wrap">
+      <div class="table-header">
+        <h3>🚛 Danh sách chuyến xe gần đây</h3>
+        <button class="btn btn-outline btn-sm">Xem tất cả →</button>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Mã xe</th>
+            <th>Tài xế</th>
+            <th>Từ</th>
+            <th>Đến</th>
+            <th>Số lượng</th>
+            <th>Trạng thái</th>
+          </tr>
+        </thead>
+        <tbody id="adminTripsTable"></tbody>
+      </table>
+    </div>
+    </div>{{-- end padding wrapper --}}
+  </main>
 </div>
+@endsection
 
-</body>
-</html>
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Init charts
+  initAdminCharts();
+  // Init map
+  initAdminMap('adminMap');
+
+  // Fill table
+  const tbody = document.getElementById('adminTripsTable');
+  if (tbody) {
+    tbody.innerHTML = MOCK.adminTrips.map(t => `
+      <tr>
+        <td><strong>${t.id}</strong></td>
+        <td>${t.driver}</td>
+        <td>${t.from}</td>
+        <td>${t.to}</td>
+        <td>${t.items} gói</td>
+        <td><span class="status-pill ${t.statusType}">${t.status}</span></td>
+      </tr>
+    `).join('');
+  }
+});
+</script>
+@endpush

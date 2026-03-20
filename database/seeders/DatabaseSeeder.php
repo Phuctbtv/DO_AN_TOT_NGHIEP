@@ -24,6 +24,15 @@ class DatabaseSeeder extends Seeder
             'identity_card' => '001200012345'
         ]);
 
+        $warehouseManager = User::create([
+            'name' => 'Phạm Đại Phúc',
+            'email' => 'phamdaiphuc20003@gmail.com',
+            'password' => Hash::make('Phuc02032003@'),
+            'role' => 'warehouse_manager',
+            'phone' => '0123456792',
+            'identity_card' => '001200012348'
+        ]);
+
         $driver = User::create([
             'name' => 'Tài xế A',
             'email' => 'driver@relief.com',
@@ -64,7 +73,7 @@ class DatabaseSeeder extends Seeder
             'address' => 'Số 1, Đường ABC, Quận 1',
             'lat' => 21.0285,
             'lng' => 105.8542,
-            'manager_id' => $admin->id
+            'manager_id' => $warehouseManager->id
         ]);
 
         // Tạo household
