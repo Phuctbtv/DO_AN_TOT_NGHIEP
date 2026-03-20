@@ -21,7 +21,7 @@
         <div class="header-content">
             <a href="#" class="logo">
                 <i class="fas fa-shield-heart"></i>
-                <span>ĐẠI PHÚC</span>
+                <span style="font-size: 18px;">ĐẠI PHÚC</span>
             </a>
 
             <nav class="nav-menu">
@@ -53,7 +53,7 @@
     {{-- ============ HERO BANNER ============ --}}
     <section id="home" class="hero-banner">
         <div class="hero-bg"
-             style="background-image: url('https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=2000&auto=format&fit=crop&ixlib=rb-4.0.3');">
+             style="background-image: url('https://images.unsplash.com/photo-1660066522109-82af50d99488?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1400');">
         </div>
         <div class="hero-overlay"></div>
         <div class="hero-content">
@@ -62,13 +62,13 @@
             </div>
             <h1>
                 ĐẠI PHÚC
-                <span class="orange-text">Kết nối yêu thương</span>
+                <span class="orange-text" style="font-size: 40px;">Kết nối yêu thương</span>
             </h1>
             <p>Hệ thống quản lý cứu trợ bão lũ minh bạch, kịp thời và chính xác.
                Mỗi sự giúp đỡ đều được ghi lại và xác minh.</p>
             <div class="hero-buttons">
-                <button class="btn-primary">Bắt đầu ngay</button>
-                <button class="btn-secondary">Tra cứu CCCD</button>
+                <button class="btn-primary">🚀 Bắt đầu ngay</button>
+                <button class="btn-secondary">🔍 Tra cứu CCCD</button>
             </div>
         </div>
     </section>
@@ -118,7 +118,7 @@
                        placeholder="Nhập số CCCD (12 số)"
                        maxlength="12"
                        class="search-input">
-                <button class="btn-search" onclick="searchCCCD()">Tra cứu</button>
+                <button class="btn-search" onclick="searchCCCD()">🔍 Tra cứu</button>
             </div>
             <div id="searchResult" class="search-result"></div>
         </div>
@@ -132,21 +132,21 @@
             </div>
             <div class="image-cards-grid">
                 <div class="image-card">
-                    <img src="https://images.unsplash.com/photo-1559027615-cd4628902d4a?q=80&w=800&auto=format&fit=crop&ixlib=rb-4.0.3"
+                    <img src="https://images.unsplash.com/photo-1741081288260-877057e3fa27?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=800"
                          alt="Cứu hộ khẩn cấp" loading="lazy">
                     <div class="image-card-overlay">
                         <div class="image-card-text">🚤 Cứu hộ khẩn cấp</div>
                     </div>
                 </div>
                 <div class="image-card">
-                    <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=800&auto=format&fit=crop&ixlib=rb-4.0.3"
+                    <img src="https://images.unsplash.com/photo-1752010284872-76526682bfee?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=800"
                          alt="Hàng cứu trợ" loading="lazy">
                     <div class="image-card-overlay">
                         <div class="image-card-text">📦 Hàng hóa cứu trợ</div>
                     </div>
                 </div>
                 <div class="image-card">
-                    <img src="https://images.unsplash.com/photo-1504384308090-c894fdcc538d?q=80&w=800&auto=format&fit=crop&ixlib=rb-4.0.3"
+                    <img src="https://images.unsplash.com/photo-1758003653085-4ebfbd7f76b4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=800"
                          alt="Vùng hỗ trợ" loading="lazy">
                     <div class="image-card-overlay">
                         <div class="image-card-text">🗺️ Vùng hỗ trợ</div>
@@ -440,7 +440,7 @@
             </div>
 
             <div class="footer-bottom">
-                <p>© 2024 ĐẠI PHÚC. Tất cả quyền được bảo lưu.</p>
+                <p>© 2026 ĐẠI PHÚC. Tất cả quyền được bảo lưu.</p>
             </div>
         </div>
     </footer>
