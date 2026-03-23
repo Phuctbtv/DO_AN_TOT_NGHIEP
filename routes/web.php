@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Route;
 // ============ PUBLIC ============
 Route::get('/', function () {
     return view('welcome');
-});
+})->name('home');
 
 // ============ DASHBOARD (redirect theo role) ============
 Route::get('/dashboard', [DashboardController::class, 'index'])

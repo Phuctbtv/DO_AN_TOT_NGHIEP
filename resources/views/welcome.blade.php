@@ -29,16 +29,65 @@
   </div>
 </nav>
 
-{{-- ==================== HERO + MAP ==================== --}}
-<section class="hero">
+{{-- ==================== HERO BANNER ==================== --}}
+<section class="hero-banner">
+  <div class="hero-banner-bg" style="background-image: url('{{ asset('images/flood_banner.png') }}')"></div>
+  <div class="hero-banner-overlay"></div>
+  <div class="hero-banner-content container">
+    <div class="hero-banner-badge">🔴 ĐANG HOẠT ĐỘNG</div>
+    <h1 class="hero-banner-title">Cứu Trợ Bão Lũ<br><span>Miền Trung Việt Nam</span></h1>
+    <p class="hero-banner-sub">
+      Hệ thống điều phối cứu trợ minh bạch — theo dõi từng chuyến hàng,<br>
+      từng hộ dân được hỗ trợ theo thời gian thực
+    </p>
+    <div class="hero-banner-actions">
+      <button class="btn btn-orange btn-lg" @click="showRegModal = true">
+        📝 Đăng ký nhận hỗ trợ
+      </button>
+      <a href="#map-section" class="btn btn-banner-outline btn-lg">
+        🗺️ Xem bản đồ cứu trợ
+      </a>
+    </div>
+    <div class="hero-banner-stats">
+      <div class="hb-stat"><span class="hb-num">12,567</span><span class="hb-lbl">Hộ dân</span></div>
+      <div class="hb-divider"></div>
+      <div class="hb-stat"><span class="hb-num">1,234</span><span class="hb-lbl">Chuyến xe</span></div>
+      <div class="hb-divider"></div>
+      <div class="hb-stat"><span class="hb-num">487T</span><span class="hb-lbl">Hàng hóa</span></div>
+      <div class="hb-divider"></div>
+      <div class="hb-stat"><span class="hb-num">340</span><span class="hb-lbl">Tình nguyện viên</span></div>
+    </div>
+  </div>
+  <div class="hero-scroll-hint">
+    <span>Cuộn xuống</span>
+    <div class="scroll-arrow"></div>
+  </div>
+</section>
+
+{{-- ==================== BẢN ĐỒ CỨU TRỢ ==================== --}}
+<section class="map-section" id="map-section">
   <div class="container">
-    <h1 class="hero-title">🗺️ Bản đồ cứu trợ trực tiếp</h1>
-    <p class="hero-sub">Theo dõi tình hình hỗ trợ bão lũ miền Trung Việt Nam theo thời gian thực</p>
-    <div class="hero-map" id="mainMap"></div>
-    <div class="map-legend">
-      <span><i class="legend-red"></i> Cần gấp</span>
-      <span><i class="legend-yellow"></i> Đang hỗ trợ</span>
-      <span><i class="legend-green"></i> Đã ổn định</span>
+    <div class="map-section-header">
+      <div>
+        <span class="section-badge">🗺️ Trực tiếp</span>
+        <h2 class="section-title">Bản đồ cứu trợ trực tiếp</h2>
+        <p class="section-subtitle">Theo dõi tình hình hỗ trợ bão lũ miền Trung Việt Nam theo thời gian thực</p>
+      </div>
+      <div class="map-controls">
+        <button class="map-ctrl-btn active" onclick="filterMap('all')">Tất cả</button>
+        <button class="map-ctrl-btn" onclick="filterMap('urgent')">🔴 Cần gấp</button>
+        <button class="map-ctrl-btn" onclick="filterMap('active')">🟡 Đang hỗ trợ</button>
+        <button class="map-ctrl-btn" onclick="filterMap('done')">🟢 Đã ổn định</button>
+      </div>
+    </div>
+    <div class="map-wrapper">
+      <div class="hero-map" id="mainMap"></div>
+      <div class="map-overlay-legend">
+        <div class="mol-title">Chú thích</div>
+        <div class="mol-item"><i class="legend-red"></i> Cần hỗ trợ gấp</div>
+        <div class="mol-item"><i class="legend-yellow"></i> Đang được hỗ trợ</div>
+        <div class="mol-item"><i class="legend-green"></i> Đã ổn định</div>
+      </div>
     </div>
   </div>
 </section>
