@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\SupplyController;
 use Illuminate\Support\Facades\Route;
 
 // ============ PUBLIC ============
@@ -19,6 +20,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/dashboard', function () {
         return view('dashboard.admin');
     })->name('dashboard');
+
+    // Supplies (nhu yếu phẩm)
+    Route::resource('supplies', SupplyController::class);
 });
 
 // ============ WAREHOUSE MANAGER ============
