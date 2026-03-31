@@ -16,7 +16,7 @@
     <a href="#" @class(['active' => ($activeMenu ?? '') === 'households'])>
       <span class="nav-icon">🏠</span> Hộ dân
     </a>
-    <a href="#" @class(['active' => ($activeMenu ?? '') === 'warehouses'])>
+    <a href="{{ route('admin.warehouses.index') }}" @class(['active' => ($activeMenu ?? '') === 'warehouses'])>
       <span class="nav-icon">📦</span> Kho hàng
     </a>
   </nav>
@@ -49,7 +49,7 @@
   {{-- HỆ THỐNG --}}
   <div class="sidebar-section">HỆ THỐNG</div>
   <nav class="sidebar-nav">
-    <a href="#" @class(['active' => ($activeMenu ?? '') === 'users'])>
+    <a href="{{ route('admin.users.index') }}" @class(['active' => ($activeMenu ?? '') === 'users'])>
       <span class="nav-icon">👥</span> Người dùng
     </a>
     <a href="#" @class(['active' => ($activeMenu ?? '') === 'approvals'])>

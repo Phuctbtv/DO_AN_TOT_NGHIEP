@@ -3,6 +3,8 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SupplyController;
+use App\Http\Controllers\WarehouseController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 // ============ PUBLIC ============
@@ -23,6 +25,12 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     // Supplies (nhu yếu phẩm)
     Route::resource('supplies', SupplyController::class);
+
+    // Warehouses (kho hàng)
+    Route::resource('warehouses', WarehouseController::class);
+
+    // Users (quản lý tài khoản)
+    Route::resource('users', UserController::class);
 });
 
 // ============ WAREHOUSE MANAGER ============
