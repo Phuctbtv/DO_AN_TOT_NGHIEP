@@ -49,8 +49,13 @@ class UserController extends Controller
 
         User::create($data);
 
+        $from = $request->query('from');
+        if ($from === 'driver') {
+            return redirect()->route('admin.users.index', ['role' => 'driver'])
+                ->with('success', 'Tạo tài xế thành công!');
+        }
         return redirect()->route('admin.users.index')
-            ->with('success', 'Đã thêm tài khoản thành công!');
+            ->with('success', 'Tạo tài khoản thành công!');
     }
 
     /**
@@ -68,7 +73,6 @@ class UserController extends Controller
     {
         $data = $request->validated();
 
-        // Chỉ cập nhật password nếu có điền
         if (empty($data['password'])) {
             unset($data['password']);
         } else {
@@ -77,6 +81,12 @@ class UserController extends Controller
 
         $user->update($data);
 
+        // Redirect đúng vị trí dựa trên context
+        $from = $request->query('from');
+        if ($from === 'driver') {
+            return redirect()->route('admin.users.index', ['role' => 'driver'])
+                ->with('success', 'Cập nhật tài xế thành công!');
+        }
         return redirect()->route('admin.users.index')
             ->with('success', 'Đã cập nhật tài khoản thành công!');
     }
@@ -86,20 +96,22 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
-        // Không cho xoá chính mình
         if ($user->id === auth()->id()) {
             return redirect()->route('admin.users.index')
                 ->with('error', 'Không thể xoá tài khoản của chính bạn!');
         }
-
-        // Không cho xoá admin
         if ($user->isAdmin()) {
             return redirect()->route('admin.users.index')
                 ->with('error', 'Không thể xoá tài khoản Admin!');
         }
 
+        $wasDriver = $user->role === 'driver';
         $user->delete();
 
+        if ($wasDriver) {
+            return redirect()->route('admin.users.index', ['role' => 'driver'])
+                ->with('success', 'Đã xoá tài xế thành công!');
+        }
         return redirect()->route('admin.users.index')
             ->with('success', 'Đã xoá tài khoản thành công!');
     }

@@ -4,10 +4,10 @@
 @section('content')
 <div class="dash-layout" x-data="{ sidebarOpen: true }">
 
-  @include('partials.admin-sidebar', ['activeMenu' => 'users'])
+  @include('partials.admin-sidebar', ['activeMenu' => request('from') === 'driver' ? 'drivers' : 'users'])
 
   <main class="dash-main">
-    @include('partials.dashboard-header', ['pageTitle' => '➕ Thêm tài khoản mới'])
+    @include('partials.dashboard-header', ['pageTitle' => request('from') === 'driver' ? '➕ Thêm Tài xế mới' : '➕ Thêm tài khoản mới'])
     <div style="padding:1.5rem">
 
       <div style="max-width:640px">
@@ -25,7 +25,7 @@
         @endif
 
         <div class="table-wrap" style="padding:1.75rem">
-          <form action="{{ route('admin.users.store') }}" method="POST" autocomplete="off">
+          <form action="{{ route('admin.users.store') }}?from={{ request('from') }}" method="POST" autocomplete="off">
             @csrf
 
             {{-- Tên --}}
@@ -86,8 +86,8 @@
               <select name="role"
                 style="width:100%;padding:.6rem .9rem;border:1px solid {{ $errors->has('role') ? '#fca5a5' : '#d1d5db' }};border-radius:8px;font-size:.9rem;background:#fff;color:#374151;box-sizing:border-box">
                 <option value="">-- Chọn vai trò --</option>
-                <option value="warehouse_manager" @selected(old('role') === 'warehouse_manager')>🏭 Thủ kho</option>
-                <option value="driver"            @selected(old('role') === 'driver')>🚛 Tài xế</option>
+                <option value="warehouse_manager" @selected(old('role', request('from') === 'driver' ? '' : '') === 'warehouse_manager')>🏭 Thủ kho</option>
+                <option value="driver"            @selected(old('role', request('from') === 'driver' ? 'driver' : '') === 'driver')>🚛 Tài xế</option>
                 <option value="resident"          @selected(old('role') === 'resident')>🏠 Người dân</option>
               </select>
             </div>
@@ -95,7 +95,11 @@
             {{-- ACTIONS --}}
             <div style="display:flex;gap:.75rem">
               <button type="submit" class="btn btn-primary">💾 Tạo tài khoản</button>
-              <a href="{{ route('admin.users.index') }}" class="btn btn-outline">← Quay lại</a>
+              @if(request('from') === 'driver')
+                <a href="{{ route('admin.users.index', ['role' => 'driver']) }}" class="btn btn-outline">← Quay lại Danh sách Tài xế</a>
+              @else
+                <a href="{{ route('admin.users.index') }}" class="btn btn-outline">← Quay lại</a>
+              @endif
             </div>
 
           </form>

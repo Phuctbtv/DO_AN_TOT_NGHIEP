@@ -2,6 +2,11 @@
 @section('title', 'Admin Dashboard - ĐẠI PHÚC')
 
 @section('content')
+@php
+  $pendingCount  = \App\Models\Household::pending()->count();
+  $activeCount   = \App\Models\Household::active()->count();
+  $rejectedCount = \App\Models\Household::rejected()->count();
+@endphp
 <div class="dash-layout" x-data="{ sidebarOpen: true }">
 
   {{-- ==================== SIDEBAR ==================== --}}
@@ -34,9 +39,16 @@
       </div>
       <div class="dash-card">
         <div class="card-icon" style="background:#fee2e2;color:#dc2626">⏳</div>
-        <div class="card-value">23</div>
+        <div class="card-value">{{ $pendingCount }}</div>
         <div class="card-label">Chờ phê duyệt</div>
-        <div class="card-change down">Cần xử lý gấp</div>
+        @if($pendingCount > 0)
+          <a href="{{ route('admin.households.pending') }}"
+             style="display:inline-block;margin-top:.5rem;background:#f59e0b;color:#fff;padding:.25rem .75rem;border-radius:6px;font-size:.75rem;font-weight:600;text-decoration:none">
+            Xem &amp; duyệt →
+          </a>
+        @else
+          <div class="card-change up">Không có đơn chờ</div>
+        @endif
       </div>
     </div>
 

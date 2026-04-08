@@ -5,33 +5,14 @@
 <div class="dash-layout" x-data="{ showImport: false, showExport: false }">
 
   {{-- ==================== SIDEBAR ==================== --}}
-  <aside class="sidebar">
-    <div class="sidebar-logo">🌊 ĐẠI <span>PHÚC</span></div>
-
-    <div class="sidebar-section">KHO HÀNG</div>
-    <nav class="sidebar-nav">
-      <a href="#" class="active"><span class="nav-icon">📊</span> Tổng quan</a>
-      <a href="#"><span class="nav-icon">📥</span> Nhập kho</a>
-      <a href="#"><span class="nav-icon">📤</span> Xuất kho</a>
-      <a href="#"><span class="nav-icon">📋</span> Lịch sử</a>
-    </nav>
-
-    <div class="sidebar-section">BÁO CÁO</div>
-    <nav class="sidebar-nav">
-      <a href="#"><span class="nav-icon">📈</span> Thống kê</a>
-      <a href="#"><span class="nav-icon">🔔</span> Cảnh báo tồn kho</a>
-    </nav>
-
-    <div style="margin-top:auto;padding:1rem 1.25rem;border-top:1px solid rgba(255,255,255,.1)">
-      <a href="/" style="color:rgba(255,255,255,.5);font-size:.8rem">← Về trang chủ</a>
-    </div>
-  </aside>
+  @include('partials.warehouse-sidebar', ['activeMenu' => 'dashboard'])
 
   {{-- ==================== MAIN ==================== --}}
   <main class="dash-main">
     @include('partials.dashboard-header', ['pageTitle' => '📦 Quản lý kho hàng'])
     <div style="padding:1.25rem 1.5rem;display:flex;justify-content:flex-end;gap:.5rem;border-bottom:1px solid #f1f5f9">
-      <button class="btn btn-teal btn-sm" @click="showImport = true">📥 Nhập kho</button>
+      <a href="{{ route('warehouse.stock_ins.create') }}" class="btn btn-teal btn-sm">📥 Nhập kho</a>
+      <a href="{{ route('warehouse.stock_ins.index') }}" class="btn btn-outline btn-sm">📋 Lịch sử nhập</a>
       <button class="btn btn-orange btn-sm" @click="showExport = true">📤 Xuất kho</button>
     </div>
     <div style="padding:1.5rem">

@@ -13,7 +13,7 @@
     <a href="{{ route('admin.dashboard') }}" @class(['active' => ($activeMenu ?? '') === 'dashboard'])>
       <span class="nav-icon">📊</span> Dashboard
     </a>
-    <a href="#" @class(['active' => ($activeMenu ?? '') === 'households'])>
+    <a href="{{ route('admin.households.index') }}" @class(['active' => ($activeMenu ?? '') === 'households'])>
       <span class="nav-icon">🏠</span> Hộ dân
     </a>
     <a href="{{ route('admin.warehouses.index') }}" @class(['active' => ($activeMenu ?? '') === 'warehouses'])>
@@ -35,13 +35,13 @@
   {{-- VẬN CHUYỂN --}}
   <div class="sidebar-section">VẬN CHUYỂN</div>
   <nav class="sidebar-nav">
-    <a href="#" @class(['active' => ($activeMenu ?? '') === 'trips'])>
+    <a href="{{ route('admin.trips.index') }}" @class(['active' => ($activeMenu ?? '') === 'trips'])>
       <span class="nav-icon">🚛</span> Chuyến xe
     </a>
     <a href="#" @class(['active' => ($activeMenu ?? '') === 'gps'])>
       <span class="nav-icon">🗺️</span> Giám sát GPS
     </a>
-    <a href="#" @class(['active' => ($activeMenu ?? '') === 'drivers'])>
+    <a href="{{ route('admin.drivers.index') }}" @class(['active' => ($activeMenu ?? '') === 'drivers'])>
       <span class="nav-icon">👤</span> Tài xế
     </a>
   </nav>
@@ -52,8 +52,13 @@
     <a href="{{ route('admin.users.index') }}" @class(['active' => ($activeMenu ?? '') === 'users'])>
       <span class="nav-icon">👥</span> Người dùng
     </a>
-    <a href="#" @class(['active' => ($activeMenu ?? '') === 'approvals'])>
+    <a href="{{ route('admin.households.pending') }}" @class(['active' => ($activeMenu ?? '') === 'approvals'])
+       style="position:relative">
       <span class="nav-icon">📋</span> Phê duyệt
+      @php $pc = \App\Models\Household::pending()->count(); @endphp
+      @if($pc > 0)
+        <span style="position:absolute;right:1rem;top:50%;transform:translateY(-50%);background:#f59e0b;color:#fff;border-radius:999px;padding:.1rem .45rem;font-size:.7rem;font-weight:700">{{ $pc }}</span>
+      @endif
     </a>
     <a href="#" @class(['active' => ($activeMenu ?? '') === 'feedbacks'])>
       <span class="nav-icon">💬</span> Phản hồi

@@ -4,10 +4,10 @@
 @section('content')
 <div class="dash-layout" x-data="{ sidebarOpen: true }">
 
-  @include('partials.admin-sidebar', ['activeMenu' => 'users'])
+  @include('partials.admin-sidebar', ['activeMenu' => request('from') === 'driver' ? 'drivers' : 'users'])
 
   <main class="dash-main">
-    @include('partials.dashboard-header', ['pageTitle' => '✏️ Chỉnh sửa tài khoản'])
+    @include('partials.dashboard-header', ['pageTitle' => request('from') === 'driver' ? '✏️ Chỉnh sửa Tài xế' : '✏️ Chỉnh sửa tài khoản'])
     <div style="padding:1.5rem">
 
       <div style="max-width:640px">
@@ -25,7 +25,7 @@
         @endif
 
         <div class="table-wrap" style="padding:1.75rem">
-          <form action="{{ route('admin.users.update', $user) }}" method="POST" autocomplete="off">
+          <form action="{{ route('admin.users.update', $user) }}?from={{ request('from') }}" method="POST" autocomplete="off">
             @csrf
             @method('PATCH')
 
@@ -97,7 +97,11 @@
             {{-- ACTIONS --}}
             <div style="display:flex;gap:.75rem">
               <button type="submit" class="btn btn-primary">💾 Lưu thay đổi</button>
-              <a href="{{ route('admin.users.index') }}" class="btn btn-outline">← Quay lại</a>
+              @if(request('from') === 'driver')
+                <a href="{{ route('admin.users.index', ['role' => 'driver']) }}" class="btn btn-outline">← Quay lại Danh sách Tài xế</a>
+              @else
+                <a href="{{ route('admin.users.index') }}" class="btn btn-outline">← Quay lại</a>
+              @endif
             </div>
 
           </form>

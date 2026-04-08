@@ -27,10 +27,59 @@ class Trip extends Model
 
     protected $casts = [
         'weather_alert' => 'boolean',
-        'exported_at' => 'datetime',
-        'started_at' => 'datetime',
-        'completed_at' => 'datetime'
+        'exported_at'   => 'datetime',
+        'started_at'    => 'datetime',
+        'completed_at'  => 'datetime',
     ];
+
+    // ===== STATUS HELPERS =====
+
+    public function isPreparing(): bool  { return $this->status === 'preparing'; }
+    public function isExporting(): bool  { return $this->status === 'exporting'; }
+    public function isShipping(): bool   { return $this->status === 'shipping'; }
+    public function isCompleted(): bool  { return $this->status === 'completed'; }
+    public function isCancelled(): bool  { return $this->status === 'cancelled'; }
+
+    public function getStatusLabelAttribute(): string
+    {
+        return match($this->status) {
+            'preparing'  => 'Chẩn bị',
+            'exporting'  => 'Xuất kho',
+            'shipping'   => 'Đang giao',
+            'completed'  => 'Hoàn thành',
+            'cancelled'  => 'Đã huỷ',
+            default      => $this->status,
+        };
+    }
+
+    public function getStatusColorAttribute(): string
+    {
+        return match($this->status) {
+            'preparing'  => '#f59e0b',
+            'exporting'  => '#8b5cf6',
+            'shipping'   => '#3b82f6',
+            'completed'  => '#10b981',
+            'cancelled'  => '#ef4444',
+            default      => '#64748b',
+        };
+    }
+
+    public function getStatusBgAttribute(): string
+    {
+        return match($this->status) {
+            'preparing'  => '#fef3c7',
+            'exporting'  => '#ede9fe',
+            'shipping'   => '#dbeafe',
+            'completed'  => '#d1fae5',
+            'cancelled'  => '#fee2e2',
+            default      => '#f1f5f9',
+        };
+    }
+
+    public function getTotalItemsAttribute(): int
+    {
+        return $this->tripDetails->sum('quantity_loaded');
+    }
 
     public function driver()
     {

@@ -14,12 +14,13 @@ class StockIn extends Model
         'supply_id',
         'quantity',
         'donor_info',
+        'image_url',
         'received_date',
-        'created_by'
+        'created_by',
     ];
 
     protected $casts = [
-        'received_date' => 'datetime'
+        'received_date' => 'datetime',
     ];
 
     public function warehouse()

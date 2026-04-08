@@ -5,11 +5,11 @@
 <div class="dash-layout" x-data="{ sidebarOpen: true }">
 
   {{-- SIDEBAR --}}
-  @include('partials.admin-sidebar', ['activeMenu' => 'users'])
+  @include('partials.admin-sidebar', ['activeMenu' => request('role') === 'driver' ? 'drivers' : 'users'])
 
   {{-- MAIN --}}
   <main class="dash-main">
-    @include('partials.dashboard-header', ['pageTitle' => '👥 Quản lý Tài khoản'])
+    @include('partials.dashboard-header', ['pageTitle' => request('role') === 'driver' ? '🚛 Danh sách Tài xế' : '👥 Quản lý Tài khoản'])
     <div style="padding:1.5rem">
 
       {{-- FLASH MESSAGES --}}
@@ -48,15 +48,15 @@
           @endif
         </form>
 
-        <a href="{{ route('admin.users.create') }}" class="btn btn-primary" style="white-space:nowrap">
-          + Thêm tài khoản
+        <a href="{{ route('admin.users.create', request('role') === 'driver' ? ['from' => 'driver'] : []) }}" class="btn btn-primary" style="white-space:nowrap">
+          + {{ request('role') === 'driver' ? 'Thêm Tài xế' : 'Thêm tài khoản' }}
         </a>
       </div>
 
       {{-- TABLE --}}
       <div class="table-wrap">
         <div class="table-header">
-          <h3>👤 Danh sách tài khoản
+          <h3>{{ request('role') === 'driver' ? '🚛 Danh sách Tài xế' : '👤 Danh sách tài khoản' }}
             @if(request('search') || request('role'))
               <span style="font-size:.82rem;font-weight:400;color:#6b7280">– đang lọc</span>
             @endif
@@ -109,7 +109,7 @@
                 <td style="font-size:.83rem;color:#6b7280">{{ $user->created_at->format('d/m/Y') }}</td>
                 <td style="text-align:center">
                   <div style="display:flex;gap:.4rem;justify-content:center">
-                    <a href="{{ route('admin.users.edit', $user) }}"
+                    <a href="{{ route('admin.users.edit', [$user, 'from' => request('role') === 'driver' ? 'driver' : null]) }}"
                        style="padding:.3rem .7rem;background:#dbeafe;color:#1d4ed8;border-radius:6px;font-size:.8rem;text-decoration:none">
                       ✏️ Sửa
                     </a>

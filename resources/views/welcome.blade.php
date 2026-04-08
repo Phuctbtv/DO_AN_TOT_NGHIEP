@@ -255,52 +255,65 @@
         <button class="modal-close" @click="showRegModal = false">✕</button>
       </div>
       <div class="modal-body">
-        <form onsubmit="handleRegistration(event)">
+
+        {{-- Thông báo kết quả --}}
+        <div id="regAlert" style="display:none;padding:.75rem 1rem;border-radius:8px;margin-bottom:1rem;font-size:.875rem;font-weight:500"></div>
+
+        <form id="regForm" onsubmit="handleRegistrationAjax(event)">
+          @csrf
           <div class="form-group">
             <label class="form-label">Họ tên <span class="required">*</span></label>
-            <input type="text" class="form-control" placeholder="Nguyễn Văn A" required>
+            <input type="text" id="regName" name="name" class="form-control" placeholder="Nguyễn Văn A" required autocomplete="name">
           </div>
           <div class="form-group">
             <label class="form-label">Số CCCD <span class="required">*</span></label>
-            <input type="text" class="form-control" placeholder="012345678901" maxlength="12" required>
+            <input type="text" id="regCCCD" name="identity_card" class="form-control" placeholder="012345678901" maxlength="12" pattern="[0-9]{12}" required>
+            <div style="font-size:.75rem;color:#94a3b8;margin-top:.25rem">Đúng 12 chữ số</div>
           </div>
           <div class="form-group">
-            <label class="form-label">Số điện thoại</label>
-            <input type="tel" class="form-control" placeholder="0901 234 567">
+            <label class="form-label">Số điện thoại <span class="required">*</span></label>
+            <input type="tel" id="regPhone" name="phone" class="form-control" placeholder="0901 234 567" required>
           </div>
           <div class="form-group">
             <label class="form-label">Địa chỉ <span class="required">*</span></label>
-            <textarea class="form-control" rows="2" placeholder="Số nhà, thôn/xóm, xã/phường, huyện/quận, tỉnh..." required></textarea>
+            <textarea id="regAddress" name="address" class="form-control" rows="2" placeholder="Số nhà, thôn/xóm, xã/phường, huyện/quận, tỉnh..." required></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Số thành viên trong hộ</label>
+            <input type="number" id="regMembers" name="member_count" class="form-control" placeholder="VD: 4" min="1" max="50" value="1">
           </div>
 
           {{-- GPS --}}
           <div class="form-group">
-            <label class="form-label">Vị trí GPS</label>
+            <label class="form-label">Vị trí GPS <span style="color:#94a3b8;font-size:.75rem">(tuỳ chọn, giúp định vị chính xác hơn)</span></label>
             <div style="display:flex;gap:.5rem;align-items:center">
-              <input type="text" id="regLat" class="form-control" placeholder="Vĩ độ" readonly style="flex:1">
-              <input type="text" id="regLng" class="form-control" placeholder="Kinh độ" readonly style="flex:1">
-              <button type="button" class="btn btn-outline-teal btn-sm" style="flex-shrink:0"
+              <input type="text" id="regLat" name="lat" class="form-control" placeholder="Vĩ độ" readonly style="flex:1">
+              <input type="text" id="regLng" name="lng" class="form-control" placeholder="Kinh độ" readonly style="flex:1">
+              <button type="button" class="btn btn-outline-teal btn-sm" style="flex-shrink:0" id="regGpsBtn"
                       onclick="getLocation('regLat','regLng',this)">
-                📍 Lấy vị trí hiện tại
+                📍 Lấy vị trí
               </button>
             </div>
           </div>
 
           {{-- Upload ảnh --}}
           <div class="form-group">
-            <label class="form-label">Ảnh hiện trường</label>
-            <label class="file-upload">
-              <input type="file" accept="image/*" multiple style="display:none" onchange="handleFileUpload(this, 'regPreview')">
+            <label class="form-label">Ảnh hiện trường <span style="color:#94a3b8;font-size:.75rem">(tuỳ chọn, tối đa 5MB)</span></label>
+            <label class="file-upload" for="regSceneFile">
+              <input type="file" id="regSceneFile" name="scene_image" accept="image/*" style="display:none" onchange="handleRegImagePreview(this)">
               📸 Nhấn để chọn ảnh tình hình lũ lụt tại nhà
             </label>
             <div id="regPreview" style="display:flex;flex-wrap:wrap;gap:.25rem;margin-top:.5rem"></div>
           </div>
 
-          <button type="submit" class="btn btn-teal btn-lg" style="width:100%">🚀 Gửi đăng ký</button>
+          <button type="submit" id="regSubmitBtn" class="btn btn-teal btn-lg" style="width:100%">
+            🚀 Gửi đăng ký
+          </button>
           <p style="text-align:center;font-size:.8rem;color:#64748b;margin-top:.75rem">
             Sau khi gửi, admin sẽ xem xét và phê duyệt yêu cầu trong thời gian sớm nhất
           </p>
         </form>
+
       </div>
     </div>
   </div>
@@ -355,5 +368,96 @@
       `).join('');
     }
   });
+
+  // ============================================================
+  //  XỬ LÝ ĐĂNG KÝ CỨU TRỢ – AJAX THẬT
+  // ============================================================
+  async function handleRegistrationAjax(e) {
+    e.preventDefault();
+    const form     = document.getElementById('regForm');
+    const alertEl  = document.getElementById('regAlert');
+    const submitBtn = document.getElementById('regSubmitBtn');
+
+    // Disable nút để tránh double-submit
+    submitBtn.disabled = true;
+    submitBtn.textContent = '⏳ Đang gửi...';
+    alertEl.style.display = 'none';
+
+    const formData = new FormData(form);
+
+    try {
+      const res = await fetch('{{ route("household.register") }}', {
+        method : 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        body   : formData,
+      });
+
+      const json = await res.json();
+
+      if (json.success) {
+        // Thành công
+        form.style.display = 'none';
+        alertEl.style.cssText = 'display:block;padding:1.25rem;border-radius:12px;background:#d1fae5;border:1px solid #6ee7b7;color:#065f46;font-weight:500;font-size:.9rem;text-align:center';
+        alertEl.innerHTML = `
+          <div style="font-size:2.5rem;margin-bottom:.75rem">✅</div>
+          <div style="font-size:1rem;font-weight:700;margin-bottom:.5rem">${json.message}</div>
+          <div style="font-size:.825rem;opacity:.85;margin-top:.5rem">
+            Admin sẽ xem xét và thông báo kết quả sớm nhất có thể.<br>
+            📞 Hotline hỗ trợ: <strong>1900.636.838</strong>
+          </div>
+        `;
+      } else {
+        // Lỗi validation hoặc nghiệp vụ
+        alertEl.style.cssText = 'display:block;padding:.875rem 1rem;border-radius:10px;background:#fee2e2;border:1px solid #fca5a5;color:#991b1b;font-size:.875rem;font-weight:500';
+
+        let msg = json.message || 'Có lỗi xảy ra. Vui lòng thử lại.';
+
+        // Nếu có errors từ Laravel validation
+        if (json.errors) {
+          const errs = Object.values(json.errors).flat();
+          msg = '⚠️ ' + errs.join('<br>• ');
+        }
+        alertEl.innerHTML = msg;
+        submitBtn.disabled = false;
+        submitBtn.textContent = '🚀 Gửi đăng ký';
+      }
+    } catch (err) {
+      alertEl.style.cssText = 'display:block;padding:.875rem 1rem;border-radius:10px;background:#fee2e2;border:1px solid #fca5a5;color:#991b1b;font-size:.875rem';
+      alertEl.textContent = '❌ Lỗi kết nối. Vui lòng kiểm tra mạng và thử lại.';
+      submitBtn.disabled = false;
+      submitBtn.textContent = '🚀 Gửi đăng ký';
+    }
+  }
+
+  // Preview ảnh hiện trường (1 ảnh)
+  function handleRegImagePreview(input) {
+    const preview = document.getElementById('regPreview');
+    preview.innerHTML = '';
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      // Kiểm tra kích thước (5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('Ảnh quá lớn! Vui lòng chọn ảnh nhỏ hơn 5MB.');
+        input.value = '';
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = e => {
+        preview.innerHTML = `
+          <div style="position:relative;display:inline-block">
+            <img src="${e.target.result}" style="width:120px;height:90px;object-fit:cover;border-radius:8px;border:2px solid #0d9488">
+            <button type="button" onclick="clearRegImage()" style="position:absolute;top:-6px;right:-6px;background:#ef4444;color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:12px;cursor:pointer;line-height:1">✕</button>
+          </div>
+          <div style="font-size:.75rem;color:#64748b;margin-top:.25rem">${file.name}</div>
+        `;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  function clearRegImage() {
+    document.getElementById('regSceneFile').value = '';
+    document.getElementById('regPreview').innerHTML = '';
+  }
 </script>
 @endpush
