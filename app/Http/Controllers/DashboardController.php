@@ -16,7 +16,7 @@ class DashboardController extends Controller
 
         return match ($user->role) {
             'admin'             => redirect()->route('admin.dashboard'),
-            'warehouse_manager' => redirect()->route('warehouse.dashboard'),
+            'warehouse_manager' => redirect()->route('warehouse.overview'),
             'driver'            => redirect()->route('driver.dashboard'),
             default             => redirect()->route('resident.dashboard'),
         };

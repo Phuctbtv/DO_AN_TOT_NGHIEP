@@ -25,7 +25,7 @@ class TripController extends Controller
 
     public function index(Request $request)
     {
-        $query = Trip::with(['driver', 'warehouse', 'tripDetails.supply', 'creator'])
+        $query = Trip::with(['driver', 'warehouse', 'tripDetails.supply', 'creator', 'deliveries'])
             ->when($request->filled('status'), fn($q) => $q->where('status', $request->status))
             ->when($request->filled('search'), fn($q) =>
                 $q->where('trip_code', 'like', '%' . $request->search . '%')
@@ -280,9 +280,37 @@ class TripController extends Controller
         if (!in_array($trip->status, ['preparing', 'cancelled'])) {
             return back()->with('error', 'Chỉ có thể xoá chuyến xe đang ở trạng thái Chuẩn bị hoặc Đã huỷ.');
         }
+
         $code = $trip->trip_code;
-        $trip->delete();
+
+        DB::beginTransaction();
+        try {
+            // Xóa các bảng con trước để tránh lỗi FK constraint
+            $trip->deliveries()->delete();
+            $trip->tripDetails()->delete();
+            $trip->stockOuts()->delete();
+            $trip->delete();
+            DB::commit();
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            Log::error('[TripController@destroy] ' . $e->getMessage());
+            return back()->with('error', 'Có lỗi khi xoá chuyến xe: ' . $e->getMessage());
+        }
+
         return redirect()->route('admin.trips.index')
             ->with('success', "Đã xoá chuyến xe <strong>{$code}</strong>.");
+    }
+
+    // ============================================================
+    //  API: Active Trip IDs (cho Admin WebSocket)
+    // ============================================================
+
+    public function activeIds()
+    {
+        $ids = Trip::whereIn('status', ['shipping', 'exporting'])
+            ->pluck('id')
+            ->toArray();
+
+        return response()->json($ids);
     }
 }

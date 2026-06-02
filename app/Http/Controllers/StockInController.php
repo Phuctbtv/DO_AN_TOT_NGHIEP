@@ -146,13 +146,21 @@ class StockInController extends Controller
 
     public function destroy(StockIn $stockIn)
     {
-        // Kiểm tra quyền
+        // Kiểm tra quyền: thủ kho chỉ được xóa kho của mình
         abort_unless(
             Warehouse::where('id', $stockIn->warehouse_id)
                 ->where('manager_id', auth()->id())
                 ->exists(),
             403
         );
+
+        // ── KIỂM TRA NGÀY: chỉ cho xóa trong ngày nhập ─────────────
+        if (! $stockIn->received_date->isToday()) {
+            return back()->with(
+                'error',
+                '❌ Không thể xóa phiếu nhập đã qua ngày. Chỉ được xóa trong ngày tạo.'
+            );
+        }
 
         try {
             $supply   = $stockIn->supply->name ?? 'N/A';

@@ -176,4 +176,85 @@ class TelegramService
 
         $this->sendToGroup($text);
     }
+
+    // ============================================================
+    //  XUẤT KHO → GỬI ADMIN (ADMIN_CHAT_ID cá nhân)
+    // ============================================================
+
+    /**
+     * Thủ kho xác nhận xuất kho → gửi riêng cho Admin (TELEGRAM_ADMIN_CHAT_ID)
+     */
+    public function notifyStockOutConfirmed(
+        string $tripCode,
+        string $driverName,
+        string $warehouseName,
+        string $managerName,
+        int    $itemCount,
+        string $exportedAt
+    ): void {
+        $text = "📤 <b>Xuất kho thành công!</b>\n\n"
+              . "📋 Mã chuyến: <code>{$tripCode}</code>\n"
+              . "🏭 Kho xuất: <b>{$warehouseName}</b>\n"
+              . "👨‍✈️ Tài xế: <b>{$driverName}</b>\n"
+              . "📦 Số loại hàng: <b>{$itemCount} loại</b>\n"
+              . "👤 Thủ kho xác nhận: <b>{$managerName}</b>\n"
+              . "🕐 Thời gian xuất: <b>{$exportedAt}</b>\n\n"
+              . "🚛 Chuyến xe đang trên đường giao hàng.";
+
+        $this->sendToAdmin($text); // Gửi đến TELEGRAM_ADMIN_CHAT_ID
+    }
+
+    // ============================================================
+    //  CẢNH BÁO TỒN KHO → GỬI ADMIN (ADMIN_CHAT_ID cá nhân)
+    // ============================================================
+
+    /**
+     * Thủ kho gửi yêu cầu bổ sung kho → thông báo Admin
+     */
+    public function notifyStockAlert(
+        string $warehouseName,
+        string $managerName,
+        int    $emptyCount,
+        int    $lowCount,
+        string $items   // danh sách tóm tắt
+    ): void {
+        $text = "🔔 <b>Yêu cầu bổ sung kho!</b>\n\n"
+              . "🏭 Kho: <b>{$warehouseName}</b>\n"
+              . "👤 Thủ kho: <b>{$managerName}</b>\n"
+              . "🔴 Hết hàng: <b>{$emptyCount} mặt hàng</b>\n"
+              . "🟠 Sắp hết: <b>{$lowCount} mặt hàng</b>\n\n"
+              . "📋 Chi tiết:\n{$items}\n\n"
+              . "➡️ Vào Admin Dashboard để xem và xử lý.";
+
+        $this->sendToAdmin($text);
+    }
+
+    // ============================================================
+    //  CẢNH BÁO GPS → GỬI ADMIN (ADMIN_CHAT_ID cá nhân)
+    // ============================================================
+
+    /**
+     * Tài xế xác nhận giao nhưng GPS lệch quá ngưỡng → cảnh báo Admin
+     */
+    public function notifyGpsWarning(
+        string $driverName,
+        string $deliveryCode,
+        string $householdName,
+        string $address,
+        float  $distance,
+        int    $tolerance,
+        string $reason = ''
+    ): void {
+        $text = "⚠️ <b>CẢNH BÁO GPS KHI GIAO HÀNG!</b>\n\n"
+              . "🚛 Tài xế: <b>{$driverName}</b>\n"
+              . "📋 Mã giao: <code>{$deliveryCode}</code>\n"
+              . "🏠 Hộ dân: <b>{$householdName}</b>\n"
+              . "📍 Địa chỉ: {$address}\n\n"
+              . "📏 Khoảng cách lệch: <b>" . round($distance) . " mét</b>\n"
+              . "🔒 Ngưỡng cho phép: {$tolerance} mét\n"
+              . ($reason ? "💬 Lý do: <i>{$reason}</i>\n" : "")
+              . "\n➡️ Vào Admin Dashboard để xem chi tiết delivery.";
+
+        $this->sendToAdmin($text);
+    }
 }

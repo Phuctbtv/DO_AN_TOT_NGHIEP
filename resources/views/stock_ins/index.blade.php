@@ -255,14 +255,21 @@
                          style="padding:.3rem .7rem;background:#dbeafe;color:#1d4ed8;border-radius:6px;font-size:.8rem;text-decoration:none;white-space:nowrap">
                         👁️ Xem
                       </a>
-                      <form action="{{ route('warehouse.stock_ins.destroy', $si) }}" method="POST"
-                            onsubmit="return confirm('⚠️ Xác nhận xóa phiếu nhập này?')">
-                        @csrf @method('DELETE')
-                        <button type="submit"
-                                style="padding:.3rem .7rem;background:#fee2e2;color:#dc2626;border:none;border-radius:6px;font-size:.8rem;cursor:pointer;white-space:nowrap">
-                          🗑️ Xóa
-                        </button>
-                      </form>
+                      @if($si->received_date->isToday())
+                        <form action="{{ route('warehouse.stock_ins.destroy', $si) }}" method="POST"
+                              onsubmit="return confirm('⚠️ Xác nhận xóa phiếu nhập này?')">
+                          @csrf @method('DELETE')
+                          <button type="submit"
+                                  style="padding:.3rem .7rem;background:#fee2e2;color:#dc2626;border:none;border-radius:6px;font-size:.8rem;cursor:pointer;white-space:nowrap">
+                            🗑️ Xóa
+                          </button>
+                        </form>
+                      @else
+                        <span title="Chỉ xóa được trong ngày tạo"
+                              style="padding:.3rem .7rem;background:#f1f5f9;color:#cbd5e1;border-radius:6px;font-size:.8rem;cursor:not-allowed;white-space:nowrap;border:1px dashed #e2e8f0;user-select:none">
+                          🔒 Xóa
+                        </span>
+                      @endif
                     </div>
                   </td>
                 </tr>
@@ -283,12 +290,7 @@
           </table>
         </div>
 
-        {{-- PAGINATION --}}
-        @if($stockIns->hasPages())
-          <div style="padding:1rem 1.25rem;border-top:1px solid #f1f5f9;display:flex;justify-content:flex-end">
-            {{ $stockIns->links() }}
-          </div>
-        @endif
+        @include('partials.pagination', ['paginator' => $stockIns])
       </div>
 
     </div>{{-- end padding --}}

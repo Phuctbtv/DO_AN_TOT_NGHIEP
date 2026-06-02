@@ -135,12 +135,7 @@
           </tbody>
         </table>
 
-        {{-- PAGINATION --}}
-        @if($users->hasPages())
-          <div style="padding:1rem 1.25rem;border-top:1px solid #f1f5f9;display:flex;justify-content:flex-end">
-            {{ $users->links() }}
-          </div>
-        @endif
+        @include('partials.pagination', ['paginator' => $users])
       </div>
 
     </div>{{-- end padding --}}

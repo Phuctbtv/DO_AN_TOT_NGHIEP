@@ -49,13 +49,13 @@
       </a>
     </div>
     <div class="hero-banner-stats">
-      <div class="hb-stat"><span class="hb-num">12,567</span><span class="hb-lbl">Hộ dân</span></div>
+      <div class="hb-stat"><span class="hb-num">{{ number_format($stats['households']) }}</span><span class="hb-lbl">Hộ dân</span></div>
       <div class="hb-divider"></div>
-      <div class="hb-stat"><span class="hb-num">1,234</span><span class="hb-lbl">Chuyến xe</span></div>
+      <div class="hb-stat"><span class="hb-num">{{ $stats['active_trips'] }}</span><span class="hb-lbl">Xe đang chạy</span></div>
       <div class="hb-divider"></div>
-      <div class="hb-stat"><span class="hb-num">487T</span><span class="hb-lbl">Hàng hóa</span></div>
+      <div class="hb-stat"><span class="hb-num">{{ $stats['total_kg'] }}T</span><span class="hb-lbl">Hàng hóa</span></div>
       <div class="hb-divider"></div>
-      <div class="hb-stat"><span class="hb-num">340</span><span class="hb-lbl">Tình nguyện viên</span></div>
+      <div class="hb-stat"><span class="hb-num">{{ $stats['drivers'] }}</span><span class="hb-lbl">Tình nguyện viên</span></div>
     </div>
   </div>
   <div class="hero-scroll-hint">
@@ -75,9 +75,9 @@
       </div>
       <div class="map-controls">
         <button class="map-ctrl-btn active" onclick="filterMap('all')">Tất cả</button>
-        <button class="map-ctrl-btn" onclick="filterMap('urgent')">🔴 Cần gấp</button>
-        <button class="map-ctrl-btn" onclick="filterMap('active')">🟡 Đang hỗ trợ</button>
-        <button class="map-ctrl-btn" onclick="filterMap('done')">🟢 Đã ổn định</button>
+        <button class="map-ctrl-btn" onclick="filterMap('1')">🔴 Cần gấp</button>
+        <button class="map-ctrl-btn" onclick="filterMap('2')">🟡 Đang hỗ trợ</button>
+        <button class="map-ctrl-btn" onclick="filterMap('3')">🟢 Đã ổn định</button>
       </div>
     </div>
     <div class="map-wrapper">
@@ -91,6 +91,8 @@
     </div>
   </div>
 </section>
+{{-- Inject markers bản đồ thật từ DB --}}
+<script>window.MAP_HOUSEHOLDS = @json($mapHouseholds);</script>
 
 {{-- ==================== THỐNG KÊ ==================== --}}
 <section class="section" style="background:#fff;padding:2.5rem 0">
@@ -98,22 +100,22 @@
     <div class="stats-row">
       <div class="stat-card animate-in delay-1">
         <div class="icon">🏠</div>
-        <div class="number" data-count="12567">0</div>
+        <div class="number" data-count="{{ $stats['households'] }}">0</div>
         <div class="label">Hộ dân đã hỗ trợ</div>
       </div>
       <div class="stat-card animate-in delay-2">
         <div class="icon">🚛</div>
-        <div class="number" data-count="1234">0</div>
-        <div class="label">Chuyến xe</div>
+        <div class="number" data-count="{{ $stats['active_trips'] }}">0</div>
+        <div class="label">Xe đang giao hàng</div>
       </div>
       <div class="stat-card animate-in delay-3">
         <div class="icon">📦</div>
-        <div class="number" data-count="487">0</div>
-        <div class="label">Tấn hàng</div>
+        <div class="number" data-count="{{ $stats['total_kg'] }}">0</div>
+        <div class="label">Tấn hàng đã phát</div>
       </div>
       <div class="stat-card animate-in delay-4">
         <div class="icon">🤝</div>
-        <div class="number" data-count="340">0</div>
+        <div class="number" data-count="{{ $stats['drivers'] }}">0</div>
         <div class="label">Tình nguyện viên</div>
       </div>
     </div>
@@ -127,8 +129,23 @@
     <h2 class="section-title">Bảng tin minh bạch</h2>
     <p class="section-subtitle">Hoạt động giao hàng & cứu trợ mới nhất — minh bạch từng phút</p>
 
-    <div class="ticker-wrap" id="tickerWrap">
-      {{-- Filled by JS or static --}}
+    <div class="ticker-wrap"
+         x-data="activityFeed()"
+         x-init="load(); setInterval(load, 30000)">
+      <template x-if="items.length === 0">
+        <div style="text-align:center;padding:2rem;color:#94a3b8">⏳ Đang tải dữ liệu...</div>
+      </template>
+      <template x-for="a in items" :key="a.trip_code + a.time">
+        <div class="ticker-item">
+          <span class="ticker-time"><span class="pulse-dot"></span><span x-text="a.time"></span></span>
+          <span class="ticker-text">
+            Chuyến <strong x-text="a.trip_code"></strong>
+            đã giao <span x-text="a.supply_text"></span>
+            tại <em x-text="a.address"></em>
+            <span class="ticker-badge badge-success">Thành công</span>
+          </span>
+        </div>
+      </template>
     </div>
   </div>
 </section>
@@ -142,11 +159,47 @@
       <p class="section-subtitle">Nhập số CCCD để kiểm tra trạng thái hỗ trợ cứu trợ</p>
     </div>
 
-    <div style="display:flex;gap:.5rem;margin-top:1rem">
-      <input type="text" id="cccdInput" class="form-control" placeholder="Nhập số CCCD (VD: 012345678901)" maxlength="12">
-      <button class="btn btn-teal" onclick="lookupCCCD()" style="flex-shrink:0">🔍 Tra cứu</button>
+    <div x-data="cccdLookup()" style="margin-top:1rem">
+      <div style="display:flex;gap:.5rem">
+        <input type="text" x-model="cccd" class="form-control"
+               placeholder="Nhập 12 số CCCD" maxlength="12"
+               @keydown.enter="lookup()">
+        <button class="btn btn-teal" @click="lookup()" :disabled="loading" style="flex-shrink:0">
+          <span x-show="!loading">🔍 Tra cứu</span>
+          <span x-show="loading">⏳...</span>
+        </button>
+      </div>
+
+      {{-- Kết quả --}}
+      <div x-show="result" x-cloak style="margin-top:1rem;background:#f8fafc;border-radius:12px;padding:1.25rem;border:1px solid #e2e8f0">
+        <template x-if="result && result.found">
+          <div>
+            <div style="font-size:1.1rem;font-weight:700;color:#0d9488;margin-bottom:.75rem">🏠 Đã tìm thấy thông tin</div>
+            <div style="display:grid;gap:.5rem;font-size:.875rem">
+              <div><span style="color:#64748b">Họ tên:</span> <strong x-text="result.name"></strong></div>
+              <div><span style="color:#64748b">CCCD:</span> <span x-text="result.cccd_masked"></span></div>
+              <div><span style="color:#64748b">Địa chỉ:</span> <span x-text="result.address"></span></div>
+              <div><span style="color:#64748b">Số thành viên:</span> <span x-text="result.member_count"></span> người</div>
+              <div>
+                <span style="color:#64748b">Trạng thái:</span>
+                <span :style="'color:'+result.status_color" style="font-weight:600" x-text="result.status_label"></span>
+              </div>
+              <div x-show="result.last_delivery">
+                <span style="color:#64748b">Lần nhận gần nhất:</span> <span x-text="result.last_delivery"></span>
+              </div>
+              <div x-show="!result.last_delivery" style="color:#94a3b8">— Chưa có lần nhận hàng nào</div>
+            </div>
+          </div>
+        </template>
+        <template x-if="result && !result.found">
+          <div style="text-align:center;color:#ef4444;padding:1rem">
+            <div style="font-size:2rem">❌</div>
+            <div style="margin-top:.5rem" x-text="result.message"></div>
+          </div>
+        </template>
+      </div>
+      <div x-show="error" x-cloak style="margin-top:.75rem;color:#ef4444;font-size:.85rem" x-text="error"></div>
     </div>
-    <div id="lookupResult"></div>
   </div>
 </section>
 
@@ -159,46 +212,62 @@
       <p class="section-subtitle">Ý kiến của bạn giúp chúng tôi cải thiện công tác cứu trợ</p>
     </div>
 
-    <form onsubmit="handleFeedback(event)" style="margin-top:1rem">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
-        <div class="form-group">
-          <label class="form-label">Họ tên</label>
-          <input type="text" class="form-control" placeholder="Nguyễn Văn A" required>
+    <div x-data="publicFeedback()" style="margin-top:1rem">
+      <div x-show="sent" x-cloak style="text-align:center;padding:2rem;background:#d1fae5;border-radius:12px;color:#065f46">
+        <div style="font-size:2.5rem">✅</div>
+        <div style="font-size:1rem;font-weight:700;margin-top:.5rem">Cảm ơn! Phản hồi đã được gửi.</div>
+        <p style="font-size:.85rem;margin-top:.25rem">Chúng tôi sẽ xem xét sớm nhất có thể.</p>
+      </div>
+
+      <form x-show="!sent" @submit.prevent="submit" enctype="multipart/form-data">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+          <div class="form-group">
+            <label class="form-label">Họ tên <span style="color:#ef4444">*</span></label>
+            <input type="text" name="name" x-model="form.name" class="form-control" placeholder="Nguyễn Văn A" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Số điện thoại</label>
+            <input type="tel" name="phone" x-model="form.phone" class="form-control" placeholder="0901 234 567">
+          </div>
         </div>
         <div class="form-group">
-          <label class="form-label">Số điện thoại</label>
-          <input type="tel" class="form-control" placeholder="0901 234 567">
+          <label class="form-label">Số CCCD <span style="color:#ef4444">*</span></label>
+          <input type="text" name="identity_card" x-model="form.identity_card" class="form-control" placeholder="012345678901" maxlength="12" required>
         </div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Số CCCD</label>
-        <input type="text" class="form-control" placeholder="012345678901" maxlength="12">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Loại phản hồi</label>
-        <select class="form-control">
-          <option value="">-- Chọn loại phản hồi --</option>
-          <option>Góp ý cải thiện</option>
-          <option>Phản ánh chậm trễ</option>
-          <option>Cảm ơn / Khen ngợi</option>
-          <option>Tố cáo sai phạm</option>
-          <option>Khác</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Nội dung</label>
-        <textarea class="form-control" rows="4" placeholder="Mô tả chi tiết phản hồi của bạn..." required></textarea>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Ảnh đính kèm (nếu có)</label>
-        <label class="file-upload">
-          <input type="file" accept="image/*" multiple style="display:none" onchange="handleFileUpload(this, 'feedbackPreview')">
-          📎 Nhấn để chọn ảnh hoặc kéo thả
-        </label>
-        <div id="feedbackPreview" style="display:flex;flex-wrap:wrap;gap:.25rem;margin-top:.5rem"></div>
-      </div>
-      <button type="submit" class="btn btn-teal btn-lg" style="width:100%">📨 Gửi phản hồi</button>
-    </form>
+        <div class="form-group">
+          <label class="form-label">Loại phản hồi <span style="color:#ef4444">*</span></label>
+          <select name="type" x-model="form.type" class="form-control" required>
+            <option value="">-- Chọn loại phản hồi --</option>
+            <option value="suggestion">Góp ý cải thiện</option>
+            <option value="complaint">Phản ánh chậm trễ</option>
+            <option value="praise">Cảm ơn / Khen ngợi</option>
+            <option value="report">Tố cáo sai phạm</option>
+            <option value="other">Khác</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Nội dung <span style="color:#ef4444">*</span></label>
+          <textarea name="content" x-model="form.content" class="form-control" rows="4"
+            placeholder="Mô tả chi tiết phản hồi của bạn..." required></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Ảnh đính kèm (nếu có)</label>
+          <label class="file-upload">
+            <input type="file" name="image" accept="image/*" style="display:none"
+                   @change="form.image = $event.target.files[0]">
+            📎 Chọn ảnh minh chứng
+          </label>
+          <div x-show="form.image" style="font-size:.75rem;color:#0d9488;margin-top:.25rem">
+            ✅ Đã chọn: <span x-text="form.image ? form.image.name : ''"></span>
+          </div>
+        </div>
+        <div x-show="errMsg" x-cloak style="color:#ef4444;font-size:.85rem;margin-bottom:.75rem" x-text="errMsg"></div>
+        <button type="submit" class="btn btn-teal btn-lg" style="width:100%" :disabled="loading">
+          <span x-show="!loading">📨 Gửi phản hồi</span>
+          <span x-show="loading">⏳ Đang gửi...</span>
+        </button>
+      </form>
+    </div>
   </div>
 </section>
 
@@ -328,20 +397,52 @@
         <button class="modal-close" @click="showLookupModal = false">✕</button>
       </div>
       <div class="modal-body">
-        <div class="form-group">
-          <label class="form-label">Số CCCD</label>
-          <div style="display:flex;gap:.5rem">
-            <input type="text" id="modalCccdInput" class="form-control" placeholder="Nhập 12 số CCCD" maxlength="12">
-            <button class="btn btn-teal" style="flex-shrink:0"
-                    onclick="document.getElementById('cccdInput').value=document.getElementById('modalCccdInput').value; lookupCCCD(); document.getElementById('modalLookupResult').innerHTML=document.getElementById('lookupResult').innerHTML;">
-              Tra cứu
-            </button>
+        <div x-data="cccdLookup()">
+          <div class="form-group">
+            <label class="form-label">Số CCCD</label>
+            <div style="display:flex;gap:.5rem">
+              <input type="text" x-model="cccd" class="form-control"
+                     placeholder="Nhập 12 số CCCD" maxlength="12"
+                     @keydown.enter="lookup()">
+              <button class="btn btn-teal" style="flex-shrink:0"
+                      @click="lookup()" :disabled="loading">
+                <span x-show="!loading">🔍 Tra cứu</span>
+                <span x-show="loading">⏳...</span>
+              </button>
+            </div>
           </div>
-        </div>
-        <div id="modalLookupResult"></div>
-        <div style="margin-top:1rem;padding:1rem;background:#f8fafc;border-radius:8px;font-size:.8rem;color:#64748b">
-          <strong>CCCD mẫu để thử:</strong><br>
-          012345678901 · 098765432109 · 111222333444
+
+          {{-- Thông báo lỗi validate --}}
+          <div x-show="error" x-cloak style="margin-top:.5rem;color:#ef4444;font-size:.85rem" x-text="error"></div>
+
+          {{-- Kết quả --}}
+          <div x-show="result" x-cloak style="margin-top:1rem;background:#f8fafc;border-radius:12px;padding:1.25rem;border:1px solid #e2e8f0">
+            <template x-if="result && result.found">
+              <div>
+                <div style="font-size:1.05rem;font-weight:700;color:#0d9488;margin-bottom:.75rem">🏠 Đã tìm thấy thông tin</div>
+                <div style="display:grid;gap:.5rem;font-size:.875rem">
+                  <div><span style="color:#64748b">Họ tên:</span> <strong x-text="result.name"></strong></div>
+                  <div><span style="color:#64748b">CCCD:</span> <span x-text="result.cccd_masked"></span></div>
+                  <div><span style="color:#64748b">Địa chỉ:</span> <span x-text="result.address"></span></div>
+                  <div><span style="color:#64748b">Số thành viên:</span> <span x-text="result.member_count"></span> người</div>
+                  <div>
+                    <span style="color:#64748b">Trạng thái:</span>
+                    <span :style="'color:'+result.status_color" style="font-weight:600" x-text="result.status_label"></span>
+                  </div>
+                  <div x-show="result.last_delivery">
+                    <span style="color:#64748b">Lần nhận gần nhất:</span> <span x-text="result.last_delivery"></span>
+                  </div>
+                  <div x-show="!result.last_delivery" style="color:#94a3b8">— Chưa có lần nhận hàng nào</div>
+                </div>
+              </div>
+            </template>
+            <template x-if="result && !result.found">
+              <div style="text-align:center;color:#ef4444;padding:1rem">
+                <div style="font-size:2rem">❌</div>
+                <div style="margin-top:.5rem" x-text="result.message"></div>
+              </div>
+            </template>
+          </div>
         </div>
       </div>
     </div>
@@ -354,20 +455,51 @@
 @push('scripts')
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    // Init map
-    initMap('mainMap');
-
-    // Fill ticker
-    const tickerWrap = document.getElementById('tickerWrap');
-    if (tickerWrap) {
-      tickerWrap.innerHTML = MOCK.activities.map(a => `
-        <div class="ticker-item">
-          <span class="ticker-time"><span class="pulse-dot"></span>${a.time}</span>
-          <span class="ticker-text">${a.text} <span class="ticker-badge badge-${a.type}">${a.badge}</span></span>
-        </div>
-      `).join('');
-    }
+    // Init map với dữ liệu thật từ DB
+    initRealMap('mainMap');
   });
+
+  // ============================================================
+  //  BẢN ĐỒ THẬT – dùng window.MAP_HOUSEHOLDS
+  // ============================================================
+  let _allMarkers = [];
+  let _map = null;
+
+  function initRealMap(id) {
+    _map = L.map(id).setView([16.47, 107.59], 7);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap'
+    }).addTo(_map);
+
+    const households = window.MAP_HOUSEHOLDS || [];
+    const colorMap = { 1: '#ef4444', 2: '#f59e0b', 3: '#10b981' };
+
+    households.forEach(h => {
+      const color = colorMap[h.priority] || '#10b981';
+      const icon = L.divIcon({
+        className: '',
+        html: `<div style="width:14px;height:14px;background:${color};border-radius:50%;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.3)"></div>`,
+        iconSize: [14, 14], iconAnchor: [7, 7]
+      });
+      const marker = L.marker([h.lat, h.lng], { icon })
+        .bindPopup(`<b>${h.name}</b><br>${h.address}${h.phone ? '<br>📞 '+h.phone : ''}`)
+        .addTo(_map);
+      marker._priority = String(h.priority);
+      _allMarkers.push(marker);
+    });
+  }
+
+  function filterMap(priority) {
+    document.querySelectorAll('.map-ctrl-btn').forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
+    _allMarkers.forEach(m => {
+      if (priority === 'all' || m._priority === priority) {
+        if (!_map.hasLayer(m)) m.addTo(_map);
+      } else {
+        _map.removeLayer(m);
+      }
+    });
+  }
 
   // ============================================================
   //  XỬ LÝ ĐĂNG KÝ CỨU TRỢ – AJAX THẬT
@@ -377,87 +509,113 @@
     const form     = document.getElementById('regForm');
     const alertEl  = document.getElementById('regAlert');
     const submitBtn = document.getElementById('regSubmitBtn');
-
-    // Disable nút để tránh double-submit
     submitBtn.disabled = true;
     submitBtn.textContent = '⏳ Đang gửi...';
     alertEl.style.display = 'none';
-
     const formData = new FormData(form);
-
     try {
       const res = await fetch('{{ route("household.register") }}', {
         method : 'POST',
         headers: { 'X-Requested-With': 'XMLHttpRequest' },
         body   : formData,
       });
-
       const json = await res.json();
-
       if (json.success) {
-        // Thành công
         form.style.display = 'none';
         alertEl.style.cssText = 'display:block;padding:1.25rem;border-radius:12px;background:#d1fae5;border:1px solid #6ee7b7;color:#065f46;font-weight:500;font-size:.9rem;text-align:center';
-        alertEl.innerHTML = `
-          <div style="font-size:2.5rem;margin-bottom:.75rem">✅</div>
-          <div style="font-size:1rem;font-weight:700;margin-bottom:.5rem">${json.message}</div>
-          <div style="font-size:.825rem;opacity:.85;margin-top:.5rem">
-            Admin sẽ xem xét và thông báo kết quả sớm nhất có thể.<br>
-            📞 Hotline hỗ trợ: <strong>1900.636.838</strong>
-          </div>
-        `;
+        alertEl.innerHTML = `<div style="font-size:2.5rem;margin-bottom:.75rem">✅</div><div style="font-size:1rem;font-weight:700">${json.message}</div>`;
       } else {
-        // Lỗi validation hoặc nghiệp vụ
-        alertEl.style.cssText = 'display:block;padding:.875rem 1rem;border-radius:10px;background:#fee2e2;border:1px solid #fca5a5;color:#991b1b;font-size:.875rem;font-weight:500';
-
-        let msg = json.message || 'Có lỗi xảy ra. Vui lòng thử lại.';
-
-        // Nếu có errors từ Laravel validation
-        if (json.errors) {
-          const errs = Object.values(json.errors).flat();
-          msg = '⚠️ ' + errs.join('<br>• ');
-        }
+        alertEl.style.cssText = 'display:block;padding:.875rem 1rem;border-radius:10px;background:#fee2e2;border:1px solid #fca5a5;color:#991b1b;font-size:.875rem';
+        let msg = json.message || 'Có lỗi xảy ra.';
+        if (json.errors) msg = '⚠️ ' + Object.values(json.errors).flat().join('<br>• ');
         alertEl.innerHTML = msg;
         submitBtn.disabled = false;
         submitBtn.textContent = '🚀 Gửi đăng ký';
       }
-    } catch (err) {
-      alertEl.style.cssText = 'display:block;padding:.875rem 1rem;border-radius:10px;background:#fee2e2;border:1px solid #fca5a5;color:#991b1b;font-size:.875rem';
-      alertEl.textContent = '❌ Lỗi kết nối. Vui lòng kiểm tra mạng và thử lại.';
+    } catch {
+      alertEl.style.cssText = 'display:block;padding:.875rem 1rem;border-radius:10px;background:#fee2e2;color:#991b1b;font-size:.875rem';
+      alertEl.textContent = '❌ Lỗi kết nối. Vui lòng thử lại.';
       submitBtn.disabled = false;
       submitBtn.textContent = '🚀 Gửi đăng ký';
     }
   }
 
-  // Preview ảnh hiện trường (1 ảnh)
   function handleRegImagePreview(input) {
     const preview = document.getElementById('regPreview');
     preview.innerHTML = '';
     if (input.files && input.files[0]) {
       const file = input.files[0];
-      // Kiểm tra kích thước (5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        alert('Ảnh quá lớn! Vui lòng chọn ảnh nhỏ hơn 5MB.');
-        input.value = '';
-        return;
-      }
+      if (file.size > 5 * 1024 * 1024) { alert('Ảnh quá lớn (tối đa 5MB)'); input.value = ''; return; }
       const reader = new FileReader();
       reader.onload = e => {
-        preview.innerHTML = `
-          <div style="position:relative;display:inline-block">
-            <img src="${e.target.result}" style="width:120px;height:90px;object-fit:cover;border-radius:8px;border:2px solid #0d9488">
-            <button type="button" onclick="clearRegImage()" style="position:absolute;top:-6px;right:-6px;background:#ef4444;color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:12px;cursor:pointer;line-height:1">✕</button>
-          </div>
-          <div style="font-size:.75rem;color:#64748b;margin-top:.25rem">${file.name}</div>
-        `;
+        preview.innerHTML = `<div style="position:relative;display:inline-block"><img src="${e.target.result}" style="width:120px;height:90px;object-fit:cover;border-radius:8px;border:2px solid #0d9488"><button type="button" onclick="clearRegImage()" style="position:absolute;top:-6px;right:-6px;background:#ef4444;color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:12px;cursor:pointer">✕</button></div>`;
       };
       reader.readAsDataURL(file);
     }
   }
-
   function clearRegImage() {
     document.getElementById('regSceneFile').value = '';
     document.getElementById('regPreview').innerHTML = '';
   }
+
+  // ============================================================
+  //  ALPINE.JS COMPONENTS
+  // ============================================================
+
+  // 1) Bảng tin polling
+  function activityFeed() {
+    return {
+      items: [],
+      async load() {
+        try {
+          const r = await fetch('{{ route("api.activity-feed") }}');
+          if (r.ok) this.items = await r.json();
+        } catch {}
+      }
+    };
+  }
+
+  // 2) Tra cứu CCCD
+  function cccdLookup() {
+    return {
+      cccd: '', loading: false, result: null, error: '',
+      async lookup() {
+        if (this.cccd.length !== 12) { this.error = 'CCCD phải đúng 12 số.'; return; }
+        this.loading = true; this.result = null; this.error = '';
+        try {
+          const r = await fetch('{{ route("api.cccd-lookup") }}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+            body: JSON.stringify({ cccd: this.cccd })
+          });
+          const data = await r.json();
+          this.result = r.ok ? data : { found: false, message: data.message || 'Không tìm thấy.' };
+        } catch { this.error = 'Lỗi kết nối. Vui lòng thử lại.'; }
+        finally { this.loading = false; }
+      }
+    };
+  }
+
+  // 3) Form phản hồi công khai
+  function publicFeedback() {
+    return {
+      form: { name:'', phone:'', identity_card:'', type:'', content:'', image: null },
+      loading: false, sent: false, errMsg: '',
+      async submit() {
+        this.loading = true; this.errMsg = '';
+        const fd = new FormData();
+        Object.entries(this.form).forEach(([k, v]) => { if (v) fd.append(k, v); });
+        fd.append('_token', '{{ csrf_token() }}');
+        try {
+          const r = await fetch('{{ route("api.public-feedback") }}', { method:'POST', body: fd });
+          const data = await r.json();
+          if (data.success) { this.sent = true; }
+          else { this.errMsg = data.message || 'Gửi thất bại. Vui lòng thử lại.'; }
+        } catch { this.errMsg = 'Lỗi kết nối. Vui lòng thử lại.'; }
+        finally { this.loading = false; }
+      }
+    };
+  }
 </script>
 @endpush
+

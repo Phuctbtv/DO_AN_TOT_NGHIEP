@@ -38,7 +38,7 @@
     <a href="{{ route('admin.trips.index') }}" @class(['active' => ($activeMenu ?? '') === 'trips'])>
       <span class="nav-icon">🚛</span> Chuyến xe
     </a>
-    <a href="#" @class(['active' => ($activeMenu ?? '') === 'gps'])>
+    <a href="{{ route('admin.gps.index') }}" @class(['active' => ($activeMenu ?? '') === 'gps'])>
       <span class="nav-icon">🗺️</span> Giám sát GPS
     </a>
     <a href="{{ route('admin.drivers.index') }}" @class(['active' => ($activeMenu ?? '') === 'drivers'])>
@@ -60,8 +60,13 @@
         <span style="position:absolute;right:1rem;top:50%;transform:translateY(-50%);background:#f59e0b;color:#fff;border-radius:999px;padding:.1rem .45rem;font-size:.7rem;font-weight:700">{{ $pc }}</span>
       @endif
     </a>
-    <a href="#" @class(['active' => ($activeMenu ?? '') === 'feedbacks'])>
+    <a href="{{ route('admin.feedbacks.index') }}" @class(['active' => ($activeMenu ?? '') === 'feedbacks'])
+       style="position:relative">
       <span class="nav-icon">💬</span> Phản hồi
+      @php $fc = \App\Models\Feedback::where('status','pending')->count(); @endphp
+      @if($fc > 0)
+        <span style="position:absolute;right:1rem;top:50%;transform:translateY(-50%);background:#3b82f6;color:#fff;border-radius:999px;padding:.1rem .45rem;font-size:.7rem;font-weight:700">{{ $fc }}</span>
+      @endif
     </a>
     <a href="#" @class(['active' => ($activeMenu ?? '') === 'settings'])>
       <span class="nav-icon">⚙️</span> Cài đặt

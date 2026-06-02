@@ -47,4 +47,8 @@ return [
         'group_chat_id' => env('TELEGRAM_GROUP_CHAT_ID'),
     ],
 
+    'gps' => [
+        'tolerance_meters' => (int) env('GPS_TOLERANCE_METERS', 100),
+    ],
+
 ];

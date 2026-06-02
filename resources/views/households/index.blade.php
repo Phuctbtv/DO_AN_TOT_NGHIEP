@@ -23,19 +23,26 @@
         </div>
       @endif
 
-      {{-- HEADER + FILTER --}}
+      {{-- HEADER + ACTION BUTTONS --}}
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;flex-wrap:wrap;gap:1rem">
         <div>
           <h2 style="font-size:1.25rem;font-weight:700;color:#0f172a;margin:0">Danh sách Hộ dân</h2>
           <p style="color:#64748b;font-size:.875rem;margin:0">Quản lý tất cả hộ dân đã đăng ký cứu trợ</p>
         </div>
-        <a href="{{ route('admin.households.pending') }}"
-           style="display:inline-flex;align-items:center;gap:.5rem;background:#f59e0b;color:#fff;padding:.6rem 1.25rem;border-radius:8px;font-weight:600;font-size:.875rem;text-decoration:none">
-          ⏳ Chờ duyệt
-          @if($pendingCount > 0)
-            <span style="background:#fff;color:#f59e0b;border-radius:999px;padding:.1rem .5rem;font-size:.75rem;font-weight:700">{{ $pendingCount }}</span>
-          @endif
-        </a>
+        <div style="display:flex;gap:.75rem;flex-wrap:wrap">
+          {{-- Nút Xuất Excel --}}
+          <button onclick="document.getElementById('modal-export-hd').style.display='flex'"
+                  style="display:inline-flex;align-items:center;gap:.5rem;background:linear-gradient(135deg,#059669,#0d9488);color:#fff;padding:.6rem 1.25rem;border-radius:8px;font-weight:600;font-size:.875rem;border:none;cursor:pointer;box-shadow:0 2px 8px rgba(13,148,136,.3)">
+            📥 Xuất Excel
+          </button>
+          <a href="{{ route('admin.households.pending') }}"
+             style="display:inline-flex;align-items:center;gap:.5rem;background:#f59e0b;color:#fff;padding:.6rem 1.25rem;border-radius:8px;font-weight:600;font-size:.875rem;text-decoration:none">
+            ⏳ Chờ duyệt
+            @if($pendingCount > 0)
+              <span style="background:#fff;color:#f59e0b;border-radius:999px;padding:.1rem .5rem;font-size:.75rem;font-weight:700">{{ $pendingCount }}</span>
+            @endif
+          </a>
+        </div>
       </div>
 
       {{-- SEARCH + FILTER --}}
@@ -62,6 +69,79 @@
           </a>
         @endif
       </form>
+
+      {{-- MODAL XUẤT EXCEL HỘ DÂN --}}
+      <div id="modal-export-hd"
+           style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;align-items:center;justify-content:center"
+           onclick="if(event.target===this)this.style.display='none'">
+        <div style="background:#fff;border-radius:16px;padding:2rem;width:100%;max-width:480px;box-shadow:0 20px 60px rgba(0,0,0,.2);position:relative">
+          {{-- Header modal --}}
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
+            <div>
+              <h3 style="font-size:1.1rem;font-weight:700;color:#0f172a;margin:0">📥 Xuất Báo Cáo Hộ Dân</h3>
+              <p style="font-size:.8rem;color:#64748b;margin:.25rem 0 0">Tuỳ chỉnh bộ lọc trước khi xuất file Excel</p>
+            </div>
+            <button onclick="document.getElementById('modal-export-hd').style.display='none'"
+                    style="background:#f1f5f9;border:none;width:32px;height:32px;border-radius:8px;font-size:1.1rem;cursor:pointer;color:#64748b">✕</button>
+          </div>
+
+          <form method="GET" action="{{ route('admin.reports.households.export') }}">
+            {{-- Trạng thái --}}
+            <div style="margin-bottom:1rem">
+              <label style="display:block;font-size:.8rem;font-weight:600;color:#374151;margin-bottom:.4rem">Trạng thái</label>
+              <select name="status" id="hd-status"
+                      style="width:100%;padding:.6rem .9rem;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.88rem;color:#0f172a;background:#fff">
+                <option value="">Tất cả trạng thái</option>
+                <option value="active">✅ Đã duyệt</option>
+                <option value="pending">⏳ Chờ duyệt</option>
+                <option value="rejected">❌ Từ chối</option>
+              </select>
+            </div>
+
+            {{-- Mức ưu tiên --}}
+            <div style="margin-bottom:1rem">
+              <label style="display:block;font-size:.8rem;font-weight:600;color:#374151;margin-bottom:.4rem">Mức ưu tiên</label>
+              <select name="priority" id="hd-priority"
+                      style="width:100%;padding:.6rem .9rem;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.88rem;color:#0f172a;background:#fff">
+                <option value="">Tất cả mức ưu tiên</option>
+                <option value="1">🔴 Cấp 1 – Khẩn cấp</option>
+                <option value="2">🟡 Cấp 2 – Cần thiết</option>
+                <option value="3">🟢 Cấp 3 – Bình thường</option>
+              </select>
+            </div>
+
+            {{-- Khoảng thời gian --}}
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1.5rem">
+              <div>
+                <label style="display:block;font-size:.8rem;font-weight:600;color:#374151;margin-bottom:.4rem">Từ ngày</label>
+                <input type="date" name="date_from" id="hd-date-from"
+                       style="width:100%;padding:.6rem .9rem;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.88rem;color:#0f172a">
+              </div>
+              <div>
+                <label style="display:block;font-size:.8rem;font-weight:600;color:#374151;margin-bottom:.4rem">Đến ngày</label>
+                <input type="date" name="date_to" id="hd-date-to"
+                       style="width:100%;padding:.6rem .9rem;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.88rem;color:#0f172a">
+              </div>
+            </div>
+
+            {{-- Preview info --}}
+            <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:.75rem 1rem;margin-bottom:1.25rem;font-size:.82rem;color:#166534">
+              📊 File Excel sẽ bao gồm: <strong>STT, Họ tên, CCCD, SĐT, Địa chỉ, Số thành viên, Mức ưu tiên, Trạng thái, Ngày đăng ký, Ngày duyệt</strong>
+            </div>
+
+            <div style="display:flex;gap:.75rem">
+              <button type="button" onclick="document.getElementById('modal-export-hd').style.display='none'"
+                      style="flex:1;padding:.7rem;border:1.5px solid #e2e8f0;background:#fff;border-radius:8px;font-weight:600;color:#64748b;cursor:pointer">
+                Huỷ
+              </button>
+              <button type="submit"
+                      style="flex:2;padding:.7rem;background:linear-gradient(135deg,#059669,#0d9488);color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:.95rem;box-shadow:0 2px 8px rgba(13,148,136,.3)">
+                📥 Tải xuống Excel
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
 
       {{-- TABLE --}}
       <div class="table-wrap">
@@ -126,12 +206,7 @@
         </table>
       </div>
 
-      {{-- PAGINATION --}}
-      @if($households->hasPages())
-        <div style="margin-top:1.25rem">
-          {{ $households->links() }}
-        </div>
-      @endif
+      @include('partials.pagination', ['paginator' => $households])
 
     </div>
   </main>

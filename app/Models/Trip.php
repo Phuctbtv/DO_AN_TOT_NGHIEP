@@ -43,7 +43,7 @@ class Trip extends Model
     public function getStatusLabelAttribute(): string
     {
         return match($this->status) {
-            'preparing'  => 'Chẩn bị',
+            'preparing'  => 'Chuẩn bị',
             'exporting'  => 'Xuất kho',
             'shipping'   => 'Đang giao',
             'completed'  => 'Hoàn thành',

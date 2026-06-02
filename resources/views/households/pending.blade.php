@@ -115,10 +115,7 @@
         </div>
       @endforelse
 
-      {{-- Pagination --}}
-      @if($households->hasPages())
-        <div style="margin-top:1.25rem">{{ $households->links() }}</div>
-      @endif
+      @include('partials.pagination', ['paginator' => $households])
 
     </div>
   </main>
